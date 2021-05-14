@@ -1,0 +1,75 @@
+Bink Media Player is licensed for use as follows:
+  """
+    Copyright (c) 2021 The WhiteBox Authors.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+
+        1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+        2. Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following disclaimer
+    in the documentation and/or other materials provided with the
+    distribution.
+        3. Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived from
+    this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  """
+
+The Bink Media Player license applies to all parts that are not explicitly
+marked with other licenses or externally maintained libraries.
+
+- Bink Media Player uses deps/bink v1.9c library, which is licensed as follows:
+  """
+    The product name Bink, Bink Video, and the Bink logo are all copyrighted
+    and trademarked by RAD Game Tools, Inc.  Copyright 1994-2008 RAD Game
+    Tools, Inc.  All Rights Reserved.  Printed and produced in the United
+    States of America.
+
+    As a licensee of Bink, you must abide by the terms set forth in your
+    license agreement.  Please refer to that agreement if you have any
+    questions about what you may or may not do with this documentation or the
+    software to which it pertains.  Bink is not copy protected, but it is
+    copyrighted.  We think our license agreements are fair, and that our
+    software is reasonably priced for the quality and effort we have put into
+    it.  Using our software in ways other than allowed by your license agreement
+    violates federal, civil, and criminal law.  We rely primarily on your good
+    faith not to violate our copyright; please respect it.
+
+    This software and documentation are provided "as is" without warranty of
+    any kind, either expressed or implied, including, but not limited to, the
+    implied warranties of merchantability and fitness for a particular purpose.
+    In no event will RAD Game Tools, Inc. be liable to you for damages, 
+    including any general, special, incidental or consequential damages arising
+    out of the use or inability to use the product (including, but not limited
+    to, loss of data).
+
+    Thanks to AMD for their kind support during the development of Bink for
+    Windows 64!
+    This software is based in part on the work of the Independent JPEG Group.
+
+    All brand and product names mentioned in this documentation are trademarks
+    or registered trademarks of their respective companies.
+  """
+
+- Bink Media Player uses deps/miles v7.1a library, which is licensed as follows:
+  """
+    Miles Sound System
+    Author: John Miles
+
+    Copyright (C) 1991-2007, RAD Game Tools, Inc.
+    Contact RAD Game Tools at 425-893-4300 for technical support.
+  """
