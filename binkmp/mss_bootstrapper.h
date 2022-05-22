@@ -5,10 +5,12 @@
 #ifndef BINK_MP_MSS_BOOTSTRAPPER_H_
 #define BINK_MP_MSS_BOOTSTRAPPER_H_
 
-#include "bink_base.h"
+#include "include/bink_base.h"
+//
 #include "deps/miles/include/mss.h"
 
 namespace bink {
+
 /**
  * @brief Miles sound system bootstrapper.
  */
@@ -35,6 +37,7 @@ class MssBootstrapper {
  private:
   const bool is_bootstrapped_;
 };
+
 }  // namespace bink
 
 #endif  // !BINK_MP_MSS_BOOTSTRAPPER_H_

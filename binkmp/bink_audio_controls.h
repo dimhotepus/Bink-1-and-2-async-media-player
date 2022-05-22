@@ -8,11 +8,25 @@
 #include <algorithm>
 
 #include "bink_audio_track.h"
-#include "bink_base.h"
+#include "include/bink_base.h"
+#include "include/ibink_audio_controls.h"
+//
 #include "deps/bink/bink.h"
-#include "ibink_audio_controls.h"
 
 namespace bink {
+
+/**
+ * @brief Maps 0-100 to 0-65535.
+ * @param value value.
+ * @return Mapped result.
+ */
+[[nodiscard]] constexpr uint16_t ScaleToUint16(uint8_t value) noexcept {
+  constexpr float kVolumeCoefficient{655.35f};
+
+  return std::clamp(static_cast<uint16_t>(value * kVolumeCoefficient),
+                    static_cast<uint16_t>(0), static_cast<uint16_t>(65535));
+}
+
 /**
  * @brief Bink audio controls.
  */
@@ -38,7 +52,7 @@ class BinkAudioControls : public IBinkAudioControls {
    * @param track_id Track id.
    * @return Track if any.
    */
-  std::unique_ptr<IBinkAudioTrack> GetTrackById(
+  [[nodiscard]] std::unique_ptr<IBinkAudioTrack> GetTrackById(
       AudioTrackId track_id) const noexcept override {
     auto track = std::make_unique<BinkAudioTrack>(bink_, track_id);
     return track->IsOpened() ? std::move(track)
@@ -49,7 +63,7 @@ class BinkAudioControls : public IBinkAudioControls {
    * @brief Get tracks count.
    * @return Tracks count.
    */
-  uint32_t GetTracksCount() const noexcept override {
+  [[nodiscard]] uint32_t GetTracksCount() const noexcept override {
     BINK_DCHECK(bink_);
     return static_cast<uint32_t>(std::max(0, bink_->NumTracks));
   }
@@ -63,7 +77,7 @@ class BinkAudioControls : public IBinkAudioControls {
   void SetVolume(AudioTrackId track,
                  AudioVolume volume) const noexcept override {
     BINK_DCHECK(bink_);
-    ::BinkSetVolume(bink_, track.id, volume.level);
+    ::BinkSetVolume(bink_, track.id, ScaleToUint16(volume.level));
   }
 
   /**
@@ -75,7 +89,7 @@ class BinkAudioControls : public IBinkAudioControls {
   void SetBalance(AudioTrackId track,
                   AudioBalance balance) const noexcept override {
     BINK_DCHECK(bink_);
-    ::BinkSetPan(bink_, track.id, balance.value);
+    ::BinkSetPan(bink_, track.id, ScaleToUint16(balance.value));
   }
 
   /**
@@ -92,6 +106,7 @@ class BinkAudioControls : public IBinkAudioControls {
  private:
   const HBINK bink_;
 };
+
 }  // namespace bink
 
 #endif  // !BINK_MP_BINK_AUDIO_CONTROLS_H_

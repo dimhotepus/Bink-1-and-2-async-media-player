@@ -21,24 +21,23 @@
   <ItemGroup>
     <ClInclude Include="bink_audio_controls.h" />
     <ClInclude Include="bink_audio_track.h" />
-    <ClInclude Include="bink_base.h" />
     <ClInclude Include="bink_buffer.h" />
-    <ClInclude Include="bink_general_settings.h" />
     <ClInclude Include="bink_media_player.h" />
-    <ClInclude Include="bink_media_player_settings.h" />
-    <ClInclude Include="ibink_audio_controls.h" />
-    <ClInclude Include="ibink_audio_track.h" />
-    <ClInclude Include="ibink_media_player.h" />
-    <ClInclude Include="bink_media_player_factory.h" />
-    <ClInclude Include="imss_digital_driver.h" />
+    <ClInclude Include="include\bink_base.h" />
+    <ClInclude Include="include\bink_general_settings.h" />
+    <ClInclude Include="include\bink_media_player_factory.h" />
+    <ClInclude Include="include\bink_media_player_settings.h" />
+    <ClInclude Include="include\ibink_audio_controls.h" />
+    <ClInclude Include="include\ibink_audio_track.h" />
+    <ClInclude Include="include\ibink_media_player.h" />
+    <ClInclude Include="include\imss_digital_driver.h" />
+    <ClInclude Include="include\mss_digital_driver_factory.h" />
     <ClInclude Include="mss_bootstrapper.h" />
     <ClInclude Include="mss_digital_driver.h" />
-    <ClInclude Include="mss_digital_driver_factory.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="scoped_bink_buffer_lock.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bink_buffer.cc" />
     <ClCompile Include="bink_general_settings.cc" />
     <ClCompile Include="bink_media_player.cc" />
     <ClCompile Include="bink_media_player_factory.cc" />
@@ -62,26 +61,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>

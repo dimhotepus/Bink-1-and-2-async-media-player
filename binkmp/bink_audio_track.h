@@ -9,11 +9,13 @@
 #include <cstdint>
 #include <vector>
 
-#include "bink_base.h"
+#include "include/bink_base.h"
+#include "include/ibink_audio_track.h"
+//
 #include "deps/bink/bink.h"
-#include "ibink_audio_track.h"
 
 namespace bink {
+
 /**
  * @brief Bink audio track.
  */
@@ -95,6 +97,7 @@ class BinkAudioTrack : public IBinkAudioTrack {
  private:
   HBINKTRACK bink_track_;
 };
+
 };  // namespace bink
 
 #endif  // !BINK_MP_BINK_AUDIO_TRACK_H_

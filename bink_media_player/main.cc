@@ -12,24 +12,28 @@
 
 #include <algorithm>
 #include <limits>
+#include <optional>
 #include <thread>
 
-#include "binkmp/bink_media_player_factory.h"
-#include "binkmp/ibink_media_player.h"
-#include "binkmp/mss_digital_driver_factory.h"
-#include "deps/miles/include/mss.h"
+#include "bink_media_player_host.h"
+#include "message_dispatcher.h"
 #include "scoped_com_initializer.h"
+#include "scoped_show_cursor.h"
+#include "scoped_timer_resolution.h"
+//
+#include "deps/miles/include/mss.h"
 
 namespace {
+
 /**
  * @brief Bink media player.
  */
-std::unique_ptr<bink::IBinkMediaPlayer> bink_media_player{nullptr};
+std::optional<bink::BinkMediaPlayerHost> bink_media_player_host;
 
 /**
  * @brief Default window style.
  */
-constexpr DWORD DefaultWindowStyle{WS_OVERLAPPEDWINDOW /* & ~WS_SIZEBOX*/};
+constexpr DWORD DefaultWindowStyle{WS_OVERLAPPEDWINDOW};
 
 /**
  * @brief Moves window to the center of the primary monitor.
@@ -37,23 +41,23 @@ constexpr DWORD DefaultWindowStyle{WS_OVERLAPPEDWINDOW /* & ~WS_SIZEBOX*/};
  * @param repaint_after Should repaint window after move?
  * @return true on success, false otherwise.
  */
-bool MoveWindowToPrimaryDisplayCenter(_In_ HWND window,
-                                      _In_ bool repaint_after) noexcept {
+bool MoveToMainDisplayCenter(_In_ HWND window,
+                             _In_ bool repaint_after) noexcept {
   BINK_DCHECK(!!window);
 
   RECT window_rect;
-  [[maybe_unused]] bool is_ok{!!::GetWindowRect(window, &window_rect)};
+  bool is_ok{!!::GetWindowRect(window, &window_rect)};
   BINK_DCHECK(is_ok);
 
   const long screen_width{::GetSystemMetrics(SM_CXSCREEN)},
       screen_height{::GetSystemMetrics(SM_CYSCREEN)};
-  const int window_width{std::min(screen_width, window_rect.right)},
-      window_height{std::min(screen_height, window_rect.bottom)};
-  const int x_pos{(screen_width - window_width) / 2},
-      y_pos{(screen_height - window_height) / 2};
+  const int window_width{std::min(screen_width, bink::GetWidth(window_rect))},
+      window_height{std::min(screen_height, bink::GetHeight(window_rect))};
+  const int x{(screen_width - window_width) / 2},
+      y{(screen_height - window_height) / 2};
 
-  is_ok = !!::MoveWindow(window, x_pos, y_pos, window_width, window_height,
-                         repaint_after ? TRUE : FALSE);
+  is_ok = is_ok && !!::MoveWindow(window, x, y, window_width, window_height,
+                                  repaint_after ? TRUE : FALSE);
   BINK_DCHECK(is_ok);
 
   return is_ok;
@@ -84,9 +88,10 @@ void ToggleFullscreenWindow(_In_ HWND window, _In_ DWORD default_window_style) {
           window, GWL_STYLE,
           window_style & ~static_cast<LONG_PTR>(default_window_style));
 
-      ::SetWindowPos(window, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top,
-                     mi.rcMonitor.right - mi.rcMonitor.left,
-                     mi.rcMonitor.bottom - mi.rcMonitor.top,
+      const RECT &monitor_rc{mi.rcMonitor};
+
+      ::SetWindowPos(window, HWND_TOP, monitor_rc.left, monitor_rc.top,
+                     bink::GetWidth(monitor_rc), bink::GetHeight(monitor_rc),
                      SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
     }
   } else {
@@ -102,89 +107,72 @@ void ToggleFullscreenWindow(_In_ HWND window, _In_ DWORD default_window_style) {
 }
 
 /**
- * @brief Fills a window with black pixels.
- * @param window Window.
+ * @brief Converts UTF8 to wide.
+ * @param source UTF8 string.
+ * @return Wide string.
  */
-void ClearToBlack(HWND window) noexcept {
-  PAINTSTRUCT ps;
-  // Get the repaint DC and then fill the window with black.
-  if (HDC dc{::BeginPaint(window, &ps)}) {
-    RECT client_rect;
-    [[maybe_unused]] bool ok{!!::GetClientRect(window, &client_rect)};
-    BINK_DCHECK(ok);
+[[nodiscard]] std::wstring Utf8ToWide(const std::string &source) {
+  if (source.empty()) return std::wstring{};
 
-    ok = !!::PatBlt(dc, client_rect.left, client_rect.top,
-                    client_rect.right - client_rect.left,
-                    client_rect.bottom - client_rect.top, BLACKNESS);
-    BINK_DCHECK(ok);
-
-    // The return value is always nonzero.
-    // See
-    // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-endpaint
-    (void)::EndPaint(window, &ps);
+  if (source.size() > static_cast<size_t>(std::numeric_limits<int>::max())) {
+    BINK_DCHECK(false);  // UTF8ToWide source size is too large.
+    return std::wstring{};
   }
-}
 
-/**
- * @brief Toggles video on/off.
- * @return void.
- */
-void ToggleVideoOnOff() noexcept {
-  static bool isVideoOn{true};
-  isVideoOn = !isVideoOn;
-
-  bink_media_player->ToggleVideo(isVideoOn);
-}
-
-/**
- * @brief Toggles sound on/off.
- * @return void.
- */
-void ToggleSoundOnOff() noexcept {
-  static bool isSoundOn{true};
-  isSoundOn = !isSoundOn;
-
-  bink_media_player->GetAudioControls().ToggleSound(isSoundOn);
-}
-
-/**
- * @brief Changes sound volume.
- * @param increase Increase volume?
- * @return void.
- */
-void ChangeSoundVolume(bool increase) noexcept {
-  static uint16_t volume_level{0U};
-  constexpr uint16_t VolumeStep{512U};
-
-  volume_level =
-      increase
-          ? (std::min(volume_level,
-                      static_cast<uint16_t>(
-                          std::numeric_limits<uint16_t>::max() - VolumeStep)) +
-             VolumeStep)
-          : (std::max(volume_level, VolumeStep) - VolumeStep);
-
-  const auto &audio_controls = bink_media_player->GetAudioControls();
-  audio_controls.SetVolume({.id = 0}, {.level = volume_level});
-
-  const auto track = audio_controls.GetTrackById({.id = 0});
-  if (track) {
-    bink::AudioTrackInfo track_info;
-    [[maybe_unused]] const bool is_ok{track->GetInfo(track_info)};
-
-    BINK_DCHECK(is_ok);
+  const int size{::MultiByteToWideChar(
+      CP_UTF8, 0, &source[0], static_cast<int>(source.size()), nullptr, 0)};
+  BINK_DCHECK(size > 0);
+  std::wstring result(static_cast<size_t>(size), L'\0');
+  if (::MultiByteToWideChar(CP_UTF8, 0, &source[0],
+                            static_cast<int>(source.size()), &result[0],
+                            size) != size) {
+    BINK_DCHECK(false);  // MultiByteToWideChar failed.
+    return std::wstring{};
   }
+  return result;
+}
+
+/**
+ * @brief Extract short video name from command line.
+ * @param command_line Command line.
+ * @return Short exe name.
+ */
+[[nodiscard]] std::optional<std::string> get_short_video_name_from_command_line(
+    const std::string &command_line) noexcept {
+  // Sometimes /foo/bla is also passed on windows, ex. by Visual Studio g3log
+  // tests discovery.
+  constexpr char native_path_separators[]{"\\/"};
+
+  // Assume "x:\zzzzz\yyyy.exe" www on Windows.
+  if (command_line.starts_with('"')) {
+    const size_t end_double_quote_idx{command_line.find('"', 1U)};
+    const size_t separator_before_name_idx{command_line.find_last_of(
+        native_path_separators, end_double_quote_idx)};
+
+    if (end_double_quote_idx != std::string::npos &&
+        separator_before_name_idx != std::string::npos) {
+      return command_line.substr(
+          separator_before_name_idx + 1,
+          end_double_quote_idx - separator_before_name_idx - 1);
+    }
+  }
+
+  // Has path separators.
+  if (const size_t separator_before_name_idx{
+          command_line.find_last_of(native_path_separators)};
+      separator_before_name_idx != std::string::npos) {
+    return command_line.substr(
+        separator_before_name_idx + 1,
+        command_line.size() - separator_before_name_idx - 1);
+  }
+
+  // As is.
+  return command_line;
 }
 
 void OnChar(HWND window, TCHAR ch, int) noexcept {
   if (ch == _T('F') || ch == _T('f')) {
     ToggleFullscreenWindow(window, DefaultWindowStyle);
-  } else if (ch == _T('V') || ch == _T('v')) {
-    ToggleVideoOnOff();
-  } else if (ch == _T('S') || ch == _T('s')) {
-    ToggleSoundOnOff();
-  } else if (ch == _T('+') || ch == _T('-')) {
-    ChangeSoundVolume(ch == _T('+'));
   } else {
     // Just close the window if the user hits any other key.
     ::DestroyWindow(window);
@@ -192,38 +180,35 @@ void OnChar(HWND window, TCHAR ch, int) noexcept {
 }
 
 void OnPaint([[maybe_unused]] HWND window) noexcept {
-  ClearToBlack(window);
-  bink_media_player->Present(true);
+  bink_media_player_host->OnPaint(window);
 }
 
 void OnKillFocus(HWND, HWND) noexcept {
   // Pause the video when the focus leaves the window.
-  bink_media_player->Pause();
+  bink_media_player_host->Pause();
 }
 
 void OnSetFocus(HWND, HWND) noexcept {
   // Resume the video when the focus set to the window.
-  if (bink_media_player) {
-    bink_media_player->Play();
-  }
+  if (bink_media_player_host) bink_media_player_host->Play();
 }
 
-BOOL OnEraseBkgnd(HWND, HDC) noexcept { return TRUE; }
+BOOL OnEraseBkgnd(HWND, HDC) noexcept {
+  return bink_media_player_host->OnEraseBackground();
+}
 
 BOOL OnWindowPosChanging(HWND, WINDOWPOS *pos) noexcept {
-  // Is the window even being moved?
-  if (!(pos->flags & SWP_NOMOVE)) {
-    // Yup, it's being moved - ask the BinkBuffer API to align the coordinates
-    // to a fast boundary.
-    bink_media_player->AdjustWindowPos(pos->x, pos->y);
-  }
-  return FALSE;
+  // Window is being moved - ask the BinkBuffer API to align the coordinates
+  // to a fast boundary.
+  return bink_media_player_host
+             ? bink_media_player_host->OnWindowPositionChanging(pos)
+             : FALSE;
 }
 
-void OnWindowPosChanged(HWND, const WINDOWPOS *) noexcept {
+void OnWindowPosChanged(HWND window, const WINDOWPOS *pos) noexcept {
   // Tell the BinkBuffer API when the window moves.
-  if (bink_media_player) {
-    bink_media_player->SetWindowOffset(0, 0);
+  if (bink_media_player_host) {
+    bink_media_player_host->OnWindowPositionChanged(window, pos);
   }
 }
 
@@ -259,37 +244,43 @@ LRESULT WINAPI WindowProc(HWND window, UINT message, WPARAM wParam,
 /**
  * @brief Creates a window class and window handle.
  * @param instance App instance.
- * @param previous_instance Previous app instance [obsolete].
+ * @param cmd_line Command line.
  * @return Window.
  */
-HWND CreateBinkWindow(_In_ HINSTANCE instance,
-                      _In_opt_ HINSTANCE previous_instance) noexcept {
-  // Create the window class if this is the first instance.
-  if (!previous_instance) {
-    WNDCLASS wc = {0};
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = instance;
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.lpszClassName = _T("BinkMediaPlayer_Wnd");
+[[nodiscard]] HWND CreateBinkWindow(_In_ HINSTANCE instance,
+                                    _In_z_ LPCSTR cmd_line) noexcept {
+  WNDCLASS wc = {0};
+  // Handle resizes in WM_PAINT.
+  wc.style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
+  wc.lpfnWndProc = WindowProc;
+  wc.hInstance = instance;
+  wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+  wc.lpszClassName = _T("BinkMediaPlayer_Wnd");
 
-    if (!::RegisterClass(&wc)) {
-      return nullptr;
-    }
-
-    // Return the new window with a tiny initial default size (it is resized
-    // later on with the help of the BinkBuffer API).
-    return ::CreateWindowEx(0, wc.lpszClassName, _T("Bink Media Player"),
-                            DefaultWindowStyle, CW_USEDEFAULT, CW_USEDEFAULT,
-                            1024, 768, 0, 0, instance, 0);
+  if (!::RegisterClass(&wc)) {
+    return nullptr;
   }
 
-  return nullptr;
+  const auto maybe_short_video_name =
+      get_short_video_name_from_command_line(cmd_line);
+  const std::wstring short_video_name{
+      Utf8ToWide(maybe_short_video_name.value_or(std::string{"N/A"}))};
+
+  std::wstring window_title{_T("Bink Media Player --- ")};
+  window_title.append(short_video_name);
+
+  // Return the new window with a tiny initial default size (it is resized later
+  // on with the help of the BinkBuffer API).
+  return ::CreateWindowEx(0, wc.lpszClassName, window_title.c_str(),
+                          DefaultWindowStyle, CW_USEDEFAULT, CW_USEDEFAULT,
+                          1024, 768, 0, 0, instance, 0);
 }
+
 }  // namespace
 
-int WINAPI WinMain(_In_ HINSTANCE instance,
-                   _In_opt_ HINSTANCE previous_instance, _In_ LPSTR cmd_line,
-                   _In_ int cmd_show) {
+int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE,
+                   _In_ LPSTR cmd_line, _In_ int cmd_show) {
+  // Bink depends on COM.
   const auto scoped_com_initializer = bink::ScopedComInitializer::New(
       bink::ScopedComInitializerFlags::kApartmentThreaded |
       bink::ScopedComInitializerFlags::kDisableOle1Dde |
@@ -298,77 +289,100 @@ int WINAPI WinMain(_In_ HINSTANCE instance,
     std::string error{rc->message()};
     error.insert(0, "Component Object Model initialization failed: ");
 
-    MessageBoxA(0, error.c_str(), "Bink Media Player - COM initialize Error",
+    MessageBoxA(0, error.c_str(), "Bink Media Player - COM Initialize Error",
                 MB_OK | MB_ICONSTOP);
     return 1;
   }
 
-  HWND window{CreateBinkWindow(instance, previous_instance)};
-  if (!window) {
-    MessageBox(0, L"Error creating window.",
-               L"Bink Media Player - Window Create Error", MB_OK | MB_ICONSTOP);
+  using namespace std::chrono_literals;
+
+  // Increase precision of timing functions.  Consume more power for high
+  // precision timers.
+  const auto scoped_timer_resolution = bink::ScopedTimerResolution::New(8ms);
+  if (const auto *rc = std::get_if<unsigned>(&scoped_timer_resolution)) {
+    std::string error{std::to_string(*rc)};
+    error.insert(0, "Scoped timer resolution is not set: ");
+
+    MessageBoxA(0, error.c_str(),
+                "Bink Media Player - Timer Resolution Change Error",
+                MB_OK | MB_ICONSTOP);
     return 2;
   }
 
-  /*const auto mss_create_result =
-      bink::MssDigitalDriverFactory::Create({.frequency = 44100U,
-                                             .bits_per_sample = 16,
-                                             .channels_count = MSS_MC_STEREO});
-  if (const auto *error = std::get_if<const char *>(&mss_create_result)) {
-    ::MessageBoxA(window, *error, "Miles Sound System - Driver Open Error",
-                  MB_OK | MB_ICONSTOP);
+  HWND window{CreateBinkWindow(instance, cmd_line)};
+  if (!window) {
+    MessageBox(0, L"Error creating window.",
+               L"Bink Media Player - Window Create Error", MB_OK | MB_ICONSTOP);
     return 3;
   }
-  const auto &mss_digital_driver =
-      std::get<std::unique_ptr<bink::IMssDigitalDriver>>(mss_create_result);*/
 
-  // Too much cores are nonsense, as we have no enough workload for them.
-  // Play with this to get optimal values on your platform.
+  constexpr unsigned kBinkFlags{0};
+
+  // Too much cores are nonsense, as we have no enough workload for them.  Play
+  // with this to get optimal values on your platform.
   const auto good_enough_decoder_cpu_cores_count = static_cast<uint8_t>(
-      std::clamp(std::thread::hardware_concurrency(), 1U, 4U));
-  auto bink_create_result = bink::BinkMediaPlayerFactory::Create(
+      std::clamp(std::thread::hardware_concurrency(), 1U, 2U));  //-V112
+  auto bink_media_player_result = bink::BinkMediaPlayerHost::New(
+      std::nullopt,
+      {.frequency = 44100U,
+       .bits_per_sample = 16,
+       .channels_count = MSS_MC_USE_SYSTEM_CONFIG},
       {.media_path = cmd_line,
        .window = window,
-       .sound_output_system = bink::BinkSoundOutputSystem::DirectSound,
+       .bink_flags = kBinkFlags,
        .used_cpus_count = good_enough_decoder_cpu_cores_count});
-  if (const auto *error = std::get_if<const char *>(&bink_create_result)) {
+  if (const auto *error =
+          std::get_if<const char *>(&bink_media_player_result)) {
     ::MessageBoxA(window, *error, "Bink Media Player - Media Open Error",
                   MB_OK | MB_ICONSTOP);
-    return 4;
+    return 4;  //-V112
   }
 
-  bink_media_player.swap(
-      std::get<std::unique_ptr<bink::IBinkMediaPlayer>>(bink_create_result));
+  auto maybe_bink_media_player = std::optional{
+      std::get<bink::BinkMediaPlayerHost>(std::move(bink_media_player_result))};
+  bink_media_player_host.swap(maybe_bink_media_player);
+
+  bink::BinkMediaInfo media_info;
+  if (!bink_media_player_host->GetMediaInfo(media_info)) {
+    ::MessageBoxA(window, "Unable to get media info.",
+                  "Bink Media Player - Media Open Error", MB_OK | MB_ICONSTOP);
+    return 5;
+  }
+
+  // Size the window such that its client area exactly fits our Bink movie.
+  ::SetWindowPos(window, nullptr, 0, 0,
+                 static_cast<int>(media_info.window_width),
+                 static_cast<int>(media_info.window_height), SWP_NOMOVE);
 
   // Move window to primary display center.
-  MoveWindowToPrimaryDisplayCenter(window, true);
+  MoveToMainDisplayCenter(window, true);
   // Now display the window and start the message loop.
   ::ShowWindow(window, cmd_show);
 
-  MSG msg;
-  for (;;) {
-    // Are there any messages to handle?
-    if (::PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
-      if (msg.message == WM_QUIT) break;
+  // Hide cursor while playing.
+  bink::ScopedShowCursor scoped_show_cursor{false};
 
-      ::TranslateMessage(&msg);
-      ::DispatchMessage(&msg);
+  const auto on_idle = [&]() noexcept {
+    const auto tick_result = bink_media_player_host->Tick();
+
+    // Has Bink presented something?
+    if (tick_result != bink::BinkMediaPlayerHostTickResult::NotReady) {
+      const auto has_frames = tick_result ==
+          bink::BinkMediaPlayerHostTickResult::HasFrames;
+
+      // No frames, lets close.
+      if (!has_frames) ::DestroyWindow(window);
     } else {
-      // Is it time for a new Bink frame?
-      if (bink_media_player->CanPresent()) {
-        // Yup, draw the next frame.
-        bink_media_player->Present(false);
-
-        // Check player has frames to present.
-        if (!bink_media_player->HasFrames()) {
-          // No frames, lets close.
-          ::DestroyWindow(window);
-        }
-      } else {
-        // Nope, give the rest of the system a chance to run (1 ms).
-        ::Sleep(1);
-      }
+      // Nope, give the rest of the system a chance to run (1 ms).
+      std::this_thread::sleep_for(1ms);
     }
+  };
+
+  const bink::MessageDispatcher message_dispatcher{nullptr, on_idle};
+
+  for (;;) {
+    // Run dispatch message cycle.
+    if (!message_dispatcher.Dispatch()) break;
   }
 
   return 0;

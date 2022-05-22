@@ -7,12 +7,14 @@
 
 #include <cstdint>
 
-#include "bink_base.h"
-#include "deps/miles/include/mss.h"
-#include "imss_digital_driver.h"
+#include "include/bink_base.h"
+#include "include/imss_digital_driver.h"
 #include "mss_bootstrapper.h"
+//
+#include "deps/miles/include/mss.h"
 
 namespace bink {
+
 /**
  * @brief Miles sound sytem digital driver.
  */
@@ -38,7 +40,7 @@ class MssDigitalDriver : public IMssDigitalDriver {
     return di_driver_;
   }
 
-  [[nodiscard]] bool IsOpened() const noexcept { return di_driver_; }
+  [[nodiscard]] bool IsOpened() const noexcept { return !!di_driver_; }
 
   [[nodiscard]] const char *GetLastError() const noexcept {
     return ::AIL_last_error();
@@ -48,6 +50,7 @@ class MssDigitalDriver : public IMssDigitalDriver {
   const MssBootstrapper mss_bootstrapper_;
   const HDIGDRIVER di_driver_;
 };
+
 }  // namespace bink
 
 #endif  // !BINK_MP_MSS_DIGITAL_DRIVER_H_

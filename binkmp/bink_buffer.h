@@ -5,10 +5,34 @@
 #ifndef BINK_MP_BINK_BUFFER_H_
 #define BINK_MP_BINK_BUFFER_H_
 
+#include "include/bink_base.h"
+//
 #include "deps/bink/bink.h"
-#include "bink_base.h"
 
 namespace bink {
+
+/**
+ * @brief Bink buffer settings.
+ */
+struct BinkBufferSettings {
+  /**
+   * @brief Width.
+   */
+  uint32_t width;
+  /**
+   * @brief Height.
+   */
+  uint32_t height;
+  /**
+   * @brief Window width.
+   */
+  uint32_t window_width;
+  /**
+   * @brief Window height.
+   */
+  uint32_t window_height;
+};
+
 /**
  * @brief Bink buffer.
  */
@@ -68,14 +92,32 @@ class BinkBuffer {
     BinkBufferBlit(bink_buffer_, rects, num_rects);
   }
 
+  /**
+   * @brief Gets bink buffer settings.
+   * @param settings Bink buffer settings.
+   * @return true on success, false on failure.
+   */
+  [[nodiscard]] bool GetSettings(BinkBufferSettings& settings) const noexcept {
+    if (IsOpened()) {
+      settings.width = bink_buffer_->Width;
+      settings.height = bink_buffer_->Height;
+      settings.window_width = bink_buffer_->WindowWidth;
+      settings.window_height = bink_buffer_->WindowHeight;
+
+      return true;
+    }
+
+    return false;
+  }
+
  private:
   /**
    * @brief Window to blit buffer to.
-  */
+   */
   void* window_;
   /**
    * @brief Native buffer handle.
-  */
+   */
   const HBINKBUFFER bink_buffer_;
 
   /**
@@ -105,11 +147,20 @@ class BinkBuffer {
   }
 
   /**
-   * @brief Updates window position to fit underlying buffer.
+   * @brief This function sets a new shrink/stretch scale to use.  Not all of
+   * the blitting styles can do shrinking or stretching, so be sure to specify
+   * one of the BINKBUFFERSTRETCHX, BINKBUFFERSTRETCHY, BINKBUFFERSHRINKX, or
+   * BINKBUFFERSHRINKY constants when you open the BinkBuffer, or your scale
+   * factor may be ignored.
+   * @param width New width.
+   * @param height New height.
    * @return true on success, false on failure.
-  */
-  bool UpdateWindowPos() const noexcept;
+   */
+  bool SetWindowScale(unsigned width, unsigned height) const noexcept {
+    return BinkBufferSetScale(bink_buffer_, width, height) != 0;
+  }
 };
+
 };  // namespace bink
 
 #endif  // !BINK_MP_BINK_BUFFER_H_

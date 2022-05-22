@@ -2,12 +2,14 @@
 // Use of this source code is governed by a 3-Clause BSD license that can be
 // found in the LICENSE file.
 
-#include "bink_general_settings.h"
+#include "include/bink_general_settings.h"
 
-#include "bink_base.h"
+#include "include/bink_base.h"
+//
 #include "deps/bink/bink.h"
 
 namespace bink {
+
 void BinkGeneralSettings::SetMemoryHandlers(BinkMalloc bink_malloc,
                                             BinkFree bink_free) noexcept {
   BINK_DCHECK(bink_malloc);
@@ -31,4 +33,5 @@ void BinkGeneralSettings::SetFrameRate(uint32_t frame_rate,
                                        uint32_t frame_rate_div) noexcept {
   ::BinkSetFrameRate(frame_rate, frame_rate_div);
 }
+
 }  // namespace bink

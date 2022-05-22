@@ -6,14 +6,16 @@
 
 #include <algorithm>
 
-#include "bink_base.h"
 #include "bink_buffer.h"
-#include "bink_media_player_settings.h"
-#include "deps/bink/bink.h"
-#include "ibink_media_player.h"
+#include "include/bink_base.h"
+#include "include/bink_media_player_settings.h"
+#include "include/ibink_media_player.h"
 #include "scoped_bink_buffer_lock.h"
+//
+#include "deps/bink/bink.h"
 
 namespace bink {
+
 BinkMediaPlayer::BinkMediaPlayer(  //-V730
     const BinkMediaPlayerSettings& settings) noexcept
     : bink_{::BinkOpen(settings.media_path, settings.bink_flags)},
@@ -37,13 +39,13 @@ BinkMediaPlayer::~BinkMediaPlayer() noexcept {
 }
 
 bool BinkMediaPlayer::CanPresent() const noexcept {
-  return ::BinkWait(bink_) == 0 && HasFrames();
+  return ::BinkWait(bink_) == 0;
 }
 
 void BinkMediaPlayer::Present(bool do_present_old_frame) const noexcept {
   if (!do_present_old_frame) {
     // Decompress the Bink frame.
-    // Is the previous frame done yet (wait for a ms), note that this
+    // Is the previous frame done yet (wait for a bit), note that this
     // logic assumes you already have a frame decompressing the first
     // time this function is called.
     if (DecodeFrameWait(kAsyncDecompressionWaitMks)) {
@@ -59,16 +61,24 @@ void BinkMediaPlayer::Present(bool do_present_old_frame) const noexcept {
       }
 
       // Start decompressing the next frame.
-      if (DecodeFrame()) {
-        // Copy frame to buffer.
-        Frame2Buffer();
+      if (HasFrames()) DecodeFrame();
+
+      // Copy current frame to buffer.
+      if (Frame2Buffer()) {
+        // Tell the BinkBuffer to blit the pixels onto the screen (if the
+        // BinkBuffer is using an off-screen blitting style).
+        Blit2Buffer(bink_->FrameRects,
+                    static_cast<unsigned>(::BinkGetRects(
+                        bink_, bink_buffer_.bink_buffer_->SurfaceType)));
       }
     }
+
+    return;
   }
 
-  // Tell the BinkBuffer to blit the pixels onto the screen (if the
+  // Tell the BinkBuffer to blit the pixels of old frame onto the screen (if the
   // BinkBuffer is using an off-screen blitting style).
-  Blit2Buffer();
+  Blit2Buffer(nullptr, 1U);
 }
 
 bool BinkMediaPlayer::Play() const noexcept {
@@ -139,9 +149,40 @@ bool BinkMediaPlayer::Frame2Buffer() const noexcept {
 
 void BinkMediaPlayer::NextFrame() const noexcept { ::BinkNextFrame(bink_); }
 
-void BinkMediaPlayer::Blit2Buffer() const noexcept {
-  bink_buffer_.Blit(bink_->FrameRects,
-                    static_cast<unsigned>(::BinkGetRects(
-                        bink_, bink_buffer_.bink_buffer_->SurfaceType)));
+void BinkMediaPlayer::Blit2Buffer(BINKRECT* rects,
+                                  unsigned int rects_num) const noexcept {
+  bink_buffer_.Blit(rects, rects_num);
 }
+
+[[nodiscard]] std::tuple<unsigned, unsigned> BinkMediaPlayer::FindClosestScale(
+    unsigned expected_width, unsigned expected_height) const noexcept {
+  // Integral scaling is much faster, so always scale the video as such.
+  unsigned new_width{bink_->Width}, new_height{bink_->Height};
+
+  // Find if we need to scale up or down.
+  if (new_width < expected_width && new_height < expected_height) {
+    // Scaling up by powers of two
+    unsigned scale{0};
+
+    while ((new_width << (scale + 1)) <= expected_width &&
+           (new_height << (scale + 1)) <= expected_height)
+      scale++;
+
+    return {new_width << scale, new_height << scale};
+  }
+
+  if (new_width > expected_width && new_height > expected_height) {
+    // Scaling down by powers of two.
+    unsigned scale{0};
+
+    while ((new_width >> scale) > expected_width &&
+           (new_height >> scale) > expected_height)
+      scale++;
+
+    return {new_width >> scale, new_height >> scale};
+  }
+
+  return {new_width, new_height};
+}
+
 }  // namespace bink

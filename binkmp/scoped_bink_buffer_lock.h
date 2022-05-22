@@ -7,10 +7,12 @@
 
 #include <cstddef>
 
-#include "bink_base.h"
+#include "include/bink_base.h"
+//
 #include "deps/bink/bink.h"
 
 namespace bink {
+
 /**
  * @brief Scoped Bink buffer lock.
  */
@@ -21,7 +23,7 @@ class ScopedBinkBufferLock {
    * @param bink_buffer Buffer to lock.
    * @return void.
    */
-  explicit ScopedBinkBufferLock(HBINKBUFFER bink_buffer) noexcept //-V730
+  explicit ScopedBinkBufferLock(HBINKBUFFER bink_buffer) noexcept  //-V730
       : bink_buffer_{bink_buffer},
         is_locked_{::BinkBufferLock(bink_buffer) != 0} {}
 
@@ -57,6 +59,7 @@ class ScopedBinkBufferLock {
    */
   [[maybe_unused]] std::byte pad_[sizeof(char*) - sizeof(is_locked_)];
 };
+
 };  // namespace bink
 
 #endif  // !BINK_MP_SCOPED_BINK_BUFFER_LOCK_H_

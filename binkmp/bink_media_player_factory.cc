@@ -2,12 +2,13 @@
 // Use of this source code is governed by a 3-Clause BSD license that can be
 // found in the LICENSE file.
 
-#include "bink_media_player_factory.h"
+#include "include/bink_media_player_factory.h"
 
 #include "bink_media_player.h"
-#include "ibink_media_player.h"
+#include "include/ibink_media_player.h"
 
 namespace bink {
+
 const char* SetupBinkSoundSystem(BinkSoundOutputSystem sound_system,
 #if defined(__RADWIN__) || defined(__RADLINUX__)
                                  void* sound_system_parameter
@@ -33,20 +34,19 @@ const char* SetupBinkSoundSystem(BinkSoundOutputSystem sound_system,
 
 #ifdef __RADLINUX__
     case BinkSoundOutputSystem::SdlMixer:
-      return BinkSoundUseSDLMixer() ? nullptr
-             : "Bink Sound System not set to SDL_mixer."
+    return BinkSoundUseSDLMixer() ? nullptr
+                                  : "Bink Sound System not set to SDL_mixer."
 #endif
 
 #ifdef __RADMAC__
-                 // clang-format off
+               // clang-format off
     case BinkSoundOutputSystem::SoundManager:
       return BinkSoundUseSoundManager() ? nullptr
             : "Bink Sound System not set to MacOS Sound Manager.";
       // clang-format on
 #endif
 
-    default:
-      return "Bink Sound System is set to unknown value.";
+      default: return "Bink Sound System is set to unknown value.";
   }
 }
 
@@ -64,8 +64,9 @@ CreateResult<IBinkMediaPlayer> BinkMediaPlayerFactory::Create(
   if (setup_error) return CreateResult<IBinkMediaPlayer>{setup_error};
 
   auto player = std::make_unique<BinkMediaPlayer>(settings);
-  return player->IsOpened() && player->UpdateWindowPos()
+  return player->IsOpened()
              ? CreateResult<IBinkMediaPlayer>{std::move(player)}
              : CreateResult<IBinkMediaPlayer>{player->GetLastError()};
 }
+
 }  // namespace bink

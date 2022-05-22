@@ -10,6 +10,9 @@
     <ClCompile Include="main.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bink_media_player_host.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\deps\bink\binkw32.dll" />
@@ -20,6 +23,18 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="com_error_category.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scoped_timer_resolution.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scoped_show_cursor.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bink_media_player_host.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="message_dispatcher.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

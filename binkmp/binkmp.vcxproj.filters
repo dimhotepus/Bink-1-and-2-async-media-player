@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{4489b33b-bd53-4bca-ae40-bf245b17d8c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bink_audio_controls.h">
@@ -21,31 +24,10 @@
     <ClInclude Include="bink_audio_track.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bink_base.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="bink_buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bink_general_settings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="bink_media_player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="bink_media_player_settings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ibink_audio_controls.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ibink_media_player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="bink_media_player_factory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="imss_digital_driver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mss_bootstrapper.h">
@@ -54,23 +36,41 @@
     <ClInclude Include="mss_digital_driver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mss_digital_driver_factory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="scoped_bink_buffer_lock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ibink_audio_track.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\bink_base.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bink_general_settings.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bink_media_player_factory.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bink_media_player_settings.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ibink_audio_controls.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ibink_audio_track.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ibink_media_player.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imss_digital_driver.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mss_digital_driver_factory.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bink_buffer.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="bink_general_settings.cc">
       <Filter>Source Files</Filter>
     </ClCompile>

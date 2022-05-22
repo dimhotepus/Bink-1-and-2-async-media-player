@@ -2,19 +2,21 @@
 // Use of this source code is governed by a 3-Clause BSD license that can be
 // found in the LICENSE file.
 
-#ifndef BINK_MP_BINK_MP_H_
-#define BINK_MP_BINK_MP_H_
+#ifndef BINK_MP_BINK_MEDIA_PLAYER_H_
+#define BINK_MP_BINK_MEDIA_PLAYER_H_
 
 #include <cstddef>
 
 #include "bink_audio_controls.h"
-#include "bink_base.h"
 #include "bink_buffer.h"
-#include "bink_media_player_settings.h"
+#include "include/bink_base.h"
+#include "include/bink_media_player_settings.h"
+#include "include/ibink_media_player.h"
+//
 #include "deps/bink/bink.h"
-#include "ibink_media_player.h"
 
 namespace bink {
+
 /**
  * @brief Bink media player.
  */
@@ -81,6 +83,24 @@ class BinkMediaPlayer : public IBinkMediaPlayer {
   bool ToggleVideo(bool on) const noexcept override;
 
   /**
+   * @brief Get bink media info.
+   * @return true if success, false if error.
+   */
+  bool GetMediaInfo(BinkMediaInfo& media_info) const noexcept override {
+    BinkBufferSettings settings;
+    if (IsOpened() && bink_buffer_.GetSettings(settings)) {
+      media_info.height = settings.height;
+      media_info.width = settings.width;
+      media_info.window_height = settings.window_height;
+      media_info.window_width = settings.window_width;
+
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * @brief Gets audio controls for Bink media.
    * @return Audio controls.
    */
@@ -134,11 +154,18 @@ class BinkMediaPlayer : public IBinkMediaPlayer {
   }
 
   /**
-   * @brief Updates window position to fit underlying buffer.
+   * @brief This function sets a new shrink/stretch scale to use.  Not all of
+   * the blitting styles can do shrinking or stretching, so be sure to specify
+   * one of the BINKBUFFERSTRETCHX, BINKBUFFERSTRETCHY, BINKBUFFERSHRINKX, or
+   * BINKBUFFERSHRINKY constants when you open the BinkBuffer, or your scale
+   * factor may be ignored.
+   * @param width New width.
+   * @param height New height.
    * @return true on success, false on failure.
    */
-  [[nodiscard]] bool UpdateWindowPos() const noexcept {
-    return bink_buffer_.UpdateWindowPos();
+  bool SetWindowScale(unsigned width, unsigned height) const noexcept {
+    const auto [new_width, new_height] = FindClosestScale(width, height);
+    return bink_buffer_.SetWindowScale(new_width, new_height);
   }
 
   /**
@@ -173,7 +200,7 @@ class BinkMediaPlayer : public IBinkMediaPlayer {
    */
   unsigned char used_cpus_count_;
   /**
-   * @brief Is asyn decoding initialization / shutdown succeeded?
+   * @brief Is async decoding initialization / shutdown succeeded?
    */
   bool is_async_ok_;
   /**
@@ -193,6 +220,8 @@ class BinkMediaPlayer : public IBinkMediaPlayer {
    * @return true if success, false if failure.
    */
   bool Setup(unsigned char used_cpus_count) noexcept {
+    if (!bink_) return false;
+
     for (unsigned int i{0}; i < used_cpus_count; ++i) {
       // This function starts up a background thread that you can use with
       // the BinkDoFrameAsync function.  On Windows, thread_index can be a
@@ -213,14 +242,22 @@ class BinkMediaPlayer : public IBinkMediaPlayer {
    * @return void.
    */
   void Shutdown() noexcept {
-    for (unsigned int i{used_cpus_count_}; i > 0; --i) {
-      is_async_ok_ = !!BinkRequestStopAsyncThread(static_cast<int>(i) - 1);
-      if (is_async_ok_) {
-        is_async_ok_ = !!BinkWaitStopAsyncThread(static_cast<int>(i) - 1);
-      }
+    if (!bink_) return;
 
-      BINK_DCHECK(is_async_ok_);
+    bool is_ok{true};
+    for (unsigned int i{used_cpus_count_}; i > 0; --i) {
+      is_ok = !!BinkRequestStopAsyncThread(static_cast<int>(i) - 1);
+
+      BINK_DCHECK(is_ok);
     }
+
+    for (unsigned int i{used_cpus_count_}; i > 0; --i) {
+      is_ok = !!BinkWaitStopAsyncThread(static_cast<int>(i) - 1);
+
+      BINK_DCHECK(is_ok);
+    }
+
+    is_async_ok_ = is_ok;
   }
 
   /**
@@ -278,10 +315,24 @@ class BinkMediaPlayer : public IBinkMediaPlayer {
   /**
    * @brief Tell the BinkBuffer to blit the pixels onto the screen (if the
   // BinkBuffer is using an off-screen blitting style).
+   * @param rects Dirty rectangles.
+   * @param rects_num Rectangles count.
    * @return void.
   */
-  void Blit2Buffer() const noexcept;
+  void Blit2Buffer(BINKRECT* rects, unsigned int rects_num) const noexcept;
+
+  /**
+   * @brief Finds closest power of 2 scale for |expected_width| &
+   * |expected_height|.
+   * @param expected_width Width to approximate to.
+   * @param expected_height Height to approximate to.
+   * @return {width, height} as a closest power of 2 for |expected_width| &
+   * |expected_height|.
+   */
+  [[nodiscard]] std::tuple<unsigned, unsigned> FindClosestScale(
+      unsigned expected_width, unsigned expected_height) const noexcept;
 };
+
 }  // namespace bink
 
-#endif  // !BINK_MP_BINK_MP_H_
+#endif  // !BINK_MP_BINK_MEDIA_PLAYER_H_

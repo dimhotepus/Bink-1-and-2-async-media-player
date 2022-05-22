@@ -15,7 +15,7 @@
 #include <thread>
 #include <type_traits>
 
-#include "binkmp/bink_base.h"
+#include "binkmp/include/bink_base.h"
 #include "com_error_category.h"
 
 using HRESULT = long;
@@ -23,9 +23,10 @@ using HRESULT = long;
 _Check_return_ extern "C" __declspec(dllimport) HRESULT
     __stdcall CoInitializeEx(_In_opt_ void* pvReserved,
                              _In_ unsigned long dwCoInit);
-extern "C" __declspec(dllimport) void CoUninitialize(void);
+extern "C" __declspec(dllimport) void __stdcall CoUninitialize(void);
 
 namespace bink {
+
 /**
  * @brief Enun concept.
  * @tparam TEnum Enum.
@@ -88,19 +89,19 @@ class ScopedComInitializer {
    * @param flags Flags.
    * @return ScopedComInitializer
    */
-  static os_result<ScopedComInitializer> New(
+  static SystemResult<ScopedComInitializer> New(
       const ScopedComInitializerFlags flags) noexcept {
     auto init = ScopedComInitializer{flags};
     return !init.error_code()
-               ? os_result<ScopedComInitializer>{std::move(init)}
-               : os_result<ScopedComInitializer>{init.error_code()};
+               ? SystemResult<ScopedComInitializer>{std::move(init)}
+               : SystemResult<ScopedComInitializer>{init.error_code()};
   }
 
-  ScopedComInitializer(ScopedComInitializer&& i) noexcept : error_code_ {
-    std::move(i.error_code_)
-  }
+  ScopedComInitializer(ScopedComInitializer&& i) noexcept
+      : error_code_{std::move(i.error_code_)}
 #ifndef NDEBUG
-  , thread_id_ { i.thread_id_ }
+        ,
+        thread_id_{i.thread_id_}
 #endif
   {
     // Ensure no deinitialization occurs.
@@ -136,7 +137,7 @@ class ScopedComInitializer {
    * @brief COM initializing thread id.
    */
   std::thread::id thread_id_;
-  [[maybe_unused]] std::byte pad_[4];
+  [[maybe_unused]] std::byte pad_[4];  //-V730_NOINIT
 #endif
 
   /**
@@ -145,13 +146,15 @@ class ScopedComInitializer {
    * @return nothing.
    */
   explicit ScopedComInitializer(const ScopedComInitializerFlags flags) noexcept
-      : error_code_ {
-    GetComErrorCode(::CoInitializeEx(nullptr, underlying_cast(flags)))
-  }
+      : error_code_{GetComErrorCode(
+            ::CoInitializeEx(nullptr, underlying_cast(flags)))}
 #ifndef NDEBUG
-  , thread_id_ { std::this_thread::get_id() }
+        ,
+        thread_id_{std::this_thread::get_id()}
 #endif
-  { BINK_DCHECK(!error_code()); }
+  {
+    BINK_DCHECK(!error_code());
+  }
 
   /**
    * @brief Get COM initialization result.
@@ -161,6 +164,7 @@ class ScopedComInitializer {
     return error_code_;
   }
 };
+
 }  // namespace bink
 
 #endif  // !BINK_MEDIA_PLAYER_SCOPED_COM_INITIALIZER_H_

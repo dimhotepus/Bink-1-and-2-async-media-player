@@ -2,7 +2,7 @@
 // Use of this source code is governed by a 3-Clause BSD license that can be
 // found in the LICENSE file.
 //
-// Initializes COM in scope.
+// COM error category.
 
 #ifndef BINK_MEDIA_PLAYER_COM_ERROR_CATEGORY_H_
 #define BINK_MEDIA_PLAYER_COM_ERROR_CATEGORY_H_
@@ -12,16 +12,17 @@
 #include <string>
 #include <system_error>
 
-#include "binkmp/bink_base.h"
+#include "binkmp/include/bink_base.h"
 
 using HRESULT = long;
 
 namespace bink {
+
 /**
  * @brief Convert wide string to ansi.
  * @param in Ansi string.
  * @return Wide string.
-*/
+ */
 [[nodiscard]] inline std::string WideToAnsi(const std::wstring& in) {
   const std::size_t in_size{in.size() + 1};
   std::string ansi(in_size, '\0');
@@ -85,6 +86,7 @@ class ComErrorCategory : public std::error_category {
     const HRESULT result) noexcept {
   return std::error_code{result, com_error_category()};
 }
+
 }  // namespace bink
 
 #endif  // !BINK_MEDIA_PLAYER_COM_ERROR_CATEGORY_H_
