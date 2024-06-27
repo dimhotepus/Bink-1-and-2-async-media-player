@@ -6,6 +6,6 @@
 
 namespace bink {
 
-IBinkMediaPlayer::~IBinkMediaPlayer() {}
+IBinkMediaPlayer::~IBinkMediaPlayer() noexcept {}
 
 }  // namespace bink

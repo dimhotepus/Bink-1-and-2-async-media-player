@@ -109,7 +109,7 @@ class ScopedTimerResolution {
   unsigned error_code_;
 
 #ifdef _WIN64
-  std::byte pad_[sizeof(char *) - sizeof(error_code_)];  //-V730_NOINIT
+  [[maybe_unused]] std::byte pad_[sizeof(char *) - sizeof(error_code_)];  //-V730_NOINIT
 #endif
 
   /**

@@ -163,7 +163,7 @@ class BinkMediaPlayer : public IBinkMediaPlayer {
    * @param height New height.
    * @return true on success, false on failure.
    */
-  bool SetWindowScale(unsigned width, unsigned height) const noexcept {
+  bool SetWindowScale(unsigned width, unsigned height) const noexcept override {
     const auto [new_width, new_height] = FindClosestScale(width, height);
     return bink_buffer_.SetWindowScale(new_width, new_height);
   }

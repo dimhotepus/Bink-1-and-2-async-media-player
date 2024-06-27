@@ -71,7 +71,7 @@ bool MoveToMainDisplayCenter(_In_ HWND window,
  */
 void ToggleFullscreenWindow(_In_ HWND window, _In_ DWORD default_window_style) {
   static WINDOWPLACEMENT previous_window_placement{
-      sizeof(previous_window_placement), 0U, 0U};
+      sizeof(previous_window_placement), 0U, 0U, {}, {}, {}};
 
   BINK_DCHECK(!!window);
 
@@ -249,7 +249,7 @@ LRESULT WINAPI WindowProc(HWND window, UINT message, WPARAM wParam,
  */
 [[nodiscard]] HWND CreateBinkWindow(_In_ HINSTANCE instance,
                                     _In_z_ LPCSTR cmd_line) noexcept {
-  WNDCLASS wc = {0};
+  WNDCLASS wc = {};
   // Handle resizes in WM_PAINT.
   wc.style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
   wc.lpfnWndProc = WindowProc;
@@ -341,7 +341,7 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE,
       std::optional{std::move(*bink_media_player_result)};
   bink_media_player_host.swap(maybe_bink_media_player);
 
-  bink::BinkMediaInfo media_info = {0};
+  bink::BinkMediaInfo media_info = {};
   if (!bink_media_player_host->GetMediaInfo(media_info)) {
     ::MessageBoxA(window, "Unable to get media info.",
                   "Bink Media Player - Media Open Error", MB_OK | MB_ICONSTOP);
