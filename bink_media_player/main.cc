@@ -285,8 +285,8 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE,
       bink::ScopedComInitializerFlags::kApartmentThreaded |
       bink::ScopedComInitializerFlags::kDisableOle1Dde |
       bink::ScopedComInitializerFlags::kSpeedOverMemory);
-  if (const auto *rc = std::get_if<std::error_code>(&scoped_com_initializer)) {
-    std::string error{rc->message()};
+  if (!scoped_com_initializer.has_value()) {
+    std::string error{scoped_com_initializer.error().message()};
     error.insert(0, "Component Object Model initialization failed: ");
 
     MessageBoxA(0, error.c_str(), "Bink Media Player - COM Initialize Error",
@@ -331,18 +331,17 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE,
        .window = window,
        .bink_flags = kBinkFlags,
        .used_cpus_count = good_enough_decoder_cpu_cores_count});
-  if (const auto *error =
-          std::get_if<const char *>(&bink_media_player_result)) {
-    ::MessageBoxA(window, *error, "Bink Media Player - Media Open Error",
-                  MB_OK | MB_ICONSTOP);
+  if (!bink_media_player_result.has_value()) {
+    ::MessageBoxA(window, bink_media_player_result.error(),
+                  "Bink Media Player - Media Open Error", MB_OK | MB_ICONSTOP);
     return 4;  //-V112
   }
 
-  auto maybe_bink_media_player = std::optional{
-      std::get<bink::BinkMediaPlayerHost>(std::move(bink_media_player_result))};
+  auto maybe_bink_media_player =
+      std::optional{std::move(*bink_media_player_result)};
   bink_media_player_host.swap(maybe_bink_media_player);
 
-  bink::BinkMediaInfo media_info;
+  bink::BinkMediaInfo media_info = {0};
   if (!bink_media_player_host->GetMediaInfo(media_info)) {
     ::MessageBoxA(window, "Unable to get media info.",
                   "Bink Media Player - Media Open Error", MB_OK | MB_ICONSTOP);
@@ -367,8 +366,8 @@ int WINAPI WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE,
 
     // Has Bink presented something?
     if (tick_result != bink::BinkMediaPlayerHostTickResult::NotReady) {
-      const auto has_frames = tick_result ==
-          bink::BinkMediaPlayerHostTickResult::HasFrames;
+      const auto has_frames =
+          tick_result == bink::BinkMediaPlayerHostTickResult::HasFrames;
 
       // No frames, lets close.
       if (!has_frames) ::DestroyWindow(window);

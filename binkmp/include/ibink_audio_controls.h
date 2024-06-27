@@ -54,14 +54,14 @@ struct BINK_ATTRIBUTE_NO_VTABLE IBinkAudioControls {
    * @brief Get tracks count.
    * @return Tracks count.
    */
-  virtual [[nodiscard]] uint32_t GetTracksCount() const noexcept = 0;
+  [[nodiscard]] virtual uint32_t GetTracksCount() const noexcept = 0;
 
   /**
    * @brief Get track by id.
    * @param track_id Track id.
    * @return Track if any.
    */
-  virtual [[nodiscard]] std::unique_ptr<IBinkAudioTrack> GetTrackById(
+  [[nodiscard]] virtual std::unique_ptr<IBinkAudioTrack> GetTrackById(
       AudioTrackId track_id) const noexcept = 0;
 
   /**

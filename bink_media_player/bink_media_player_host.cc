@@ -79,13 +79,12 @@ namespace bink {
   }
 
   auto mss_create_result = bink::MssDigitalDriverFactory::Create(mss_settings);
-  if (auto *error = std::get_if<const char *>(&mss_create_result))
-      [[unlikely]] {
-    return NewResult{*error};
+  if (!mss_create_result.has_value()) [[unlikely]] {
+    return NewResult{std::unexpect, mss_create_result.error()};
   }
 
-  auto mss_digital_driver = std::move(
-      std::get<std::unique_ptr<bink::IMssDigitalDriver>>(mss_create_result));
+  std::unique_ptr<bink::IMssDigitalDriver> &mss_digital_driver =
+      mss_create_result.value();
 
   auto bink_create_result =
       bink::BinkMediaPlayerFactory::Create(bink::BinkMediaPlayerSettings{
@@ -96,13 +95,12 @@ namespace bink {
           .sound_output_system = bink::BinkSoundOutputSystem::Miles,
           .miles_driver_or_direct_sound = mss_digital_driver->native_handle(),
           .used_cpus_count = player_settings.used_cpus_count});
-  if (const auto *error = std::get_if<const char *>(&bink_create_result))
-      [[unlikely]] {
-    return NewResult{*error};
+  if (!bink_create_result.has_value()) [[unlikely]] {
+    return NewResult{std::unexpect, bink_create_result.error()};
   }
 
-  std::unique_ptr<bink::IBinkMediaPlayer> bink_media_player = std::move(
-      std::get<std::unique_ptr<bink::IBinkMediaPlayer>>(bink_create_result));
+  std::unique_ptr<bink::IBinkMediaPlayer> &bink_media_player =
+      bink_create_result.value();
 
   if (maybe_general_settings.has_value()) {
     const auto &audio_controls = bink_media_player->GetAudioControls();
@@ -131,7 +129,8 @@ BinkMediaPlayerHost &BinkMediaPlayerHost::operator=(
   return *this;
 }
 
-[[nodiscard]] BinkMediaPlayerHostTickResult BinkMediaPlayerHost::Tick() const noexcept {
+[[nodiscard]] BinkMediaPlayerHostTickResult BinkMediaPlayerHost::Tick()
+    const noexcept {
   // Is it time for a new Bink frame?
   if (bink_media_player_->CanPresent()) {
     // Yup, draw the next frame.
@@ -139,8 +138,8 @@ BinkMediaPlayerHost &BinkMediaPlayerHost::operator=(
 
     // Check player has frames to present.
     return bink_media_player_->HasFrames()
-        ? BinkMediaPlayerHostTickResult::HasFrames
-        : BinkMediaPlayerHostTickResult::NoFrames;
+               ? BinkMediaPlayerHostTickResult::HasFrames
+               : BinkMediaPlayerHostTickResult::NoFrames;
   }
 
   // Nope, give the rest of the system a chance to run.

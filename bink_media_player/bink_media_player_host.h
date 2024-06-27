@@ -109,7 +109,7 @@ class BinkMediaPlayerHost {
   /**
    * @brief Bink media player host creation result.
    */
-  using NewResult = std::variant<BinkMediaPlayerHost, const char *>;
+  using NewResult = std::expected<BinkMediaPlayerHost, const char *>;
 
   /**
    * @brief Creates bink media player host.

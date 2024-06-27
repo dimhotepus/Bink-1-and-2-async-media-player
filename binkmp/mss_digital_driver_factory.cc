@@ -13,9 +13,9 @@ CreateResult<IMssDigitalDriver> MssDigitalDriverFactory::Create(
   auto driver = std::make_unique<MssDigitalDriver>(
       settings.frequency, settings.bits_per_sample, settings.channels_count,
       settings.flags);
-  return driver->IsOpened()
-             ? CreateResult<IMssDigitalDriver>{std::move(driver)}
-             : CreateResult<IMssDigitalDriver>{driver->GetLastError()};
+  return driver->IsOpened() ? CreateResult<IMssDigitalDriver>{std::move(driver)}
+                            : CreateResult<IMssDigitalDriver>{
+                                  std::unexpect, driver->GetLastError()};
 }
 
 }  // namespace bink

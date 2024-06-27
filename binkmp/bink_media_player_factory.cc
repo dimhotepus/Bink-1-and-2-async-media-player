@@ -61,12 +61,13 @@ CreateResult<IBinkMediaPlayer> BinkMediaPlayerFactory::Create(
 #endif
     )
   };
-  if (setup_error) return CreateResult<IBinkMediaPlayer>{setup_error};
+  if (setup_error)
+    return CreateResult<IBinkMediaPlayer>{std::unexpect, setup_error};
 
   auto player = std::make_unique<BinkMediaPlayer>(settings);
-  return player->IsOpened()
-             ? CreateResult<IBinkMediaPlayer>{std::move(player)}
-             : CreateResult<IBinkMediaPlayer>{player->GetLastError()};
+  return player->IsOpened() ? CreateResult<IBinkMediaPlayer>{std::move(player)}
+                            : CreateResult<IBinkMediaPlayer>{
+                                  std::unexpect, player->GetLastError()};
 }
 
 }  // namespace bink

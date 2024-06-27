@@ -8,7 +8,7 @@
 #include <cassert>
 #include <memory>
 #include <system_error>
-#include <variant>
+#include <expected>
 
 /*
  * Checks x is set in debug mode.
@@ -44,13 +44,13 @@ namespace bink {
  * @brief Bink media player create result.
  */
 template <typename T>
-using CreateResult = std::variant<std::unique_ptr<T>, const char*>;
+using CreateResult = std::expected<std::unique_ptr<T>, const char*>;
 
 /**
  * @brief Error code result.
  */
 template <typename T>
-using SystemResult = std::variant<T, std::error_code>;
+using SystemResult = std::expected<T, std::error_code>;
 
 }  // namespace bink
 

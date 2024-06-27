@@ -94,7 +94,8 @@ class ScopedComInitializer {
     auto init = ScopedComInitializer{flags};
     return !init.error_code()
                ? SystemResult<ScopedComInitializer>{std::move(init)}
-               : SystemResult<ScopedComInitializer>{init.error_code()};
+               : SystemResult<ScopedComInitializer>{std::unexpect,
+                                                    init.error_code()};
   }
 
   ScopedComInitializer(ScopedComInitializer&& i) noexcept
