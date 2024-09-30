@@ -49,6 +49,7 @@ void RADEXPLINK BinkSetVolume(HBINK, U32, S32) {}
 void RADEXPLINK BinkSetPan(HBINK, U32, S32) {}
 void RADEXPLINK BinkSetMixBins(HBINK, U32, U32 PTR4*, U32) {}
 void RADEXPLINK BinkSetMixBinVolumes(HBINK, U32, U32 PTR4*, S32 PTR4*, U32) {}
+void RADEXPLINK BinkSetWillLoop(HBINK, S32) {}
 void RADEXPLINK BinkService(HBINK) {}
 
 S32 RADEXPLINK BinkShouldSkip(HBINK) { return 0; }

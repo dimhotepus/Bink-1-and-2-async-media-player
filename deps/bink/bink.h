@@ -3,9 +3,9 @@
 
 #define BINKMAJORVERSION 1
 #define BINKMINORVERSION 9
-#define BINKSUBVERSION 9
-#define BINKVERSION "1.9i"
-#define BINKDATE    "2008-10-31"
+#define BINKSUBVERSION 17
+#define BINKVERSION "1.9q"
+#define BINKDATE    "2009-11-02"
 
 #ifndef __RADRES__
 
@@ -531,6 +531,7 @@ RADEXPFUNC void RADEXPLINK BinkSetVolume(HBINK bnk, U32 trackid, S32 volume);
 RADEXPFUNC void RADEXPLINK BinkSetPan(HBINK bnk,U32 trackid, S32 pan);
 RADEXPFUNC void RADEXPLINK BinkSetMixBins(HBINK bnk,U32 trackid, U32 PTR4* mix_bins, U32 total);
 RADEXPFUNC void RADEXPLINK BinkSetMixBinVolumes(HBINK bnk,U32 trackid, U32 PTR4* vol_mix_bins, S32 PTR4* volumes, U32 total);
+RADEXPFUNC void RADEXPLINK BinkSetWillLoop(HBINK bink, S32 onof);
 RADEXPFUNC void RADEXPLINK BinkService(HBINK bink);
 
 RADEXPFUNC S32  RADEXPLINK BinkShouldSkip(HBINK bink);
