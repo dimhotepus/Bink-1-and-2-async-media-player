@@ -140,16 +140,16 @@
       <EnableUAC>false</EnableUAC>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalLibraryDirectories>$(ProjectDir)..\deps\bink\;$(ProjectDir)..\deps\miles\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>binkw$(PlatformArchitecture).lib;mss$(PlatformArchitecture).lib;kernel32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bink2w$(PlatformArchitecture).lib;mss$(PlatformArchitecture).lib;kernel32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo Platform: $(PlatformShortName)
 
 if "$(PlatformShortName)" == "x86" (
-  copy /B "$(SolutionDir)deps\bink\binkw32.dll" "$(OutputPath)binkw32.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w32.dll" "$(OutputPath)bink2w32.dll"
   copy /B "$(SolutionDir)deps\miles\mss32.dll" "$(OutputPath)mss32.dll"
 ) else (
-  copy /B "$(SolutionDir)deps\bink\binkw64.dll" "$(OutputPath)binkw64.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w64.dll" "$(OutputPath)bink2w64.dll"
   copy /B "$(SolutionDir)deps\miles\mss64.dll" "$(OutputPath)mss64.dll"
 )</Command>
     </PostBuildEvent>
@@ -179,16 +179,16 @@ if "$(PlatformShortName)" == "x86" (
       <EnableUAC>false</EnableUAC>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalLibraryDirectories>$(ProjectDir)..\deps\bink\;$(ProjectDir)..\deps\miles\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>binkw$(PlatformArchitecture).lib;mss$(PlatformArchitecture).lib;kernel32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bink2w$(PlatformArchitecture).lib;mss$(PlatformArchitecture).lib;kernel32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo Platform: $(PlatformShortName)
 
 if "$(PlatformShortName)" == "x86" (
-  copy /B "$(SolutionDir)deps\bink\binkw32.dll" "$(OutputPath)binkw32.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w32.dll" "$(OutputPath)bink2w32.dll"
   copy /B "$(SolutionDir)deps\miles\mss32.dll" "$(OutputPath)mss32.dll"
 ) else (
-  copy /B "$(SolutionDir)deps\bink\binkw64.dll" "$(OutputPath)binkw64.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w64.dll" "$(OutputPath)bink2w64.dll"
   copy /B "$(SolutionDir)deps\miles\mss64.dll" "$(OutputPath)mss64.dll"
 )</Command>
     </PostBuildEvent>
@@ -211,16 +211,16 @@ if "$(PlatformShortName)" == "x86" (
       <EnableUAC>false</EnableUAC>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalLibraryDirectories>$(ProjectDir)..\deps\bink\;$(ProjectDir)..\deps\miles\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>binkw$(PlatformArchitecture).lib;mss$(PlatformArchitecture).lib;kernel32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bink2w$(PlatformArchitecture).lib;mss$(PlatformArchitecture).lib;kernel32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo Platform: $(PlatformShortName)
 
 if "$(PlatformShortName)" == "x86" (
-  copy /B "$(SolutionDir)deps\bink\binkw32.dll" "$(OutputPath)binkw32.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w32.dll" "$(OutputPath)bink2w32.dll"
   copy /B "$(SolutionDir)deps\miles\mss32.dll" "$(OutputPath)mss32.dll"
 ) else (
-  copy /B "$(SolutionDir)deps\bink\binkw64.dll" "$(OutputPath)binkw64.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w64.dll" "$(OutputPath)bink2w64.dll"
   copy /B "$(SolutionDir)deps\miles\mss64.dll" "$(OutputPath)mss64.dll"
 )</Command>
     </PostBuildEvent>
@@ -250,16 +250,16 @@ if "$(PlatformShortName)" == "x86" (
       <EnableUAC>false</EnableUAC>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalLibraryDirectories>$(ProjectDir)..\deps\bink\;$(ProjectDir)..\deps\miles\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>binkw$(PlatformArchitecture).lib;mss$(PlatformArchitecture).lib;kernel32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bink2w$(PlatformArchitecture).lib;mss$(PlatformArchitecture).lib;kernel32.lib;gdi32.lib;user32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>echo Platform: $(PlatformShortName)
 
 if "$(PlatformShortName)" == "x86" (
-  copy /B "$(SolutionDir)deps\bink\binkw32.dll" "$(OutputPath)binkw32.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w32.dll" "$(OutputPath)bink2w32.dll"
   copy /B "$(SolutionDir)deps\miles\mss32.dll" "$(OutputPath)mss32.dll"
 ) else (
-  copy /B "$(SolutionDir)deps\bink\binkw64.dll" "$(OutputPath)binkw64.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w64.dll" "$(OutputPath)bink2w64.dll"
   copy /B "$(SolutionDir)deps\miles\mss64.dll" "$(OutputPath)mss64.dll"
 )</Command>
     </PostBuildEvent>

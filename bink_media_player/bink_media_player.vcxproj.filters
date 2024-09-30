@@ -15,10 +15,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\deps\bink\binkw32.dll" />
-    <None Include="..\deps\bink\binkw64.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="scoped_com_initializer.h">
       <Filter>Source Files</Filter>
     </ClInclude>

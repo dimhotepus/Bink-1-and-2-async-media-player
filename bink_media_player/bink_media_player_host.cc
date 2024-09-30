@@ -93,7 +93,7 @@ namespace bink {
           .bink_flags = player_settings.bink_flags,
           .buffer_flags = player_settings.buffer_flags,
           .sound_output_system = bink::BinkSoundOutputSystem::Miles,
-          .miles_driver_or_direct_sound = mss_digital_driver->native_handle(),
+          .miles_driver_or_direct_sound_or_xaudio2 = mss_digital_driver->native_handle(),
           .used_cpus_count = player_settings.used_cpus_count});
   if (!bink_create_result.has_value()) [[unlikely]] {
     return NewResult{std::unexpect, bink_create_result.error()};

@@ -23,6 +23,11 @@ const char* SetupBinkSoundSystem(BinkSoundOutputSystem sound_system,
       return BinkSoundUseDirectSound(sound_system_parameter)
                  ? nullptr
                  : "Bink Sound System not set to Direct Sound.";
+
+    case BinkSoundOutputSystem::XAudio2:
+      return BinkSoundUseXAudio2(sound_system_parameter)
+                 ? nullptr
+                 : "Bink Sound System not set to XAudio2.";
 #endif
 
 #ifndef __RADMAC__
@@ -33,18 +38,22 @@ const char* SetupBinkSoundSystem(BinkSoundOutputSystem sound_system,
 #endif
 
 #ifdef __RADLINUX__
-    case BinkSoundOutputSystem::SdlMixer:
-    return BinkSoundUseSDLMixer() ? nullptr
-                                  : "Bink Sound System not set to SDL_mixer."
+    case BinkSoundOutputSystem::OpenAL:
+    return BinkSoundUseOpenAL() ? nullptr
+                                : "Bink Sound System not set to OpenAL."
 #endif
 
+      // clang-format off
 #ifdef __RADMAC__
-               // clang-format off
     case BinkSoundOutputSystem::SoundManager:
       return BinkSoundUseSoundManager() ? nullptr
             : "Bink Sound System not set to MacOS Sound Manager.";
-      // clang-format on
+
+    case BinkSoundOutputSystem::CoreAudio:
+      return BinkSoundUseCoreAudio() ? nullptr
+            : "Bink Sound System not set to MacOS Core Audio.";
 #endif
+      // clang-format on
 
       default: return "Bink Sound System is set to unknown value.";
   }
@@ -55,7 +64,7 @@ CreateResult<IBinkMediaPlayer> BinkMediaPlayerFactory::Create(
   const char* setup_error {
     SetupBinkSoundSystem(settings.sound_output_system,
 #if defined(__RADWIN__)
-                         settings.miles_driver_or_direct_sound
+                         settings.miles_driver_or_direct_sound_or_xaudio2
 #elif defined(__RADLINUX__)
                          settings.miles_driver
 #endif

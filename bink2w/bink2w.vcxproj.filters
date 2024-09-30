@@ -26,10 +26,10 @@
     <ClCompile Include="dllmain.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="binkw.cc">
+    <ClCompile Include="stdafx.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cc">
+    <ClCompile Include="bink2w.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

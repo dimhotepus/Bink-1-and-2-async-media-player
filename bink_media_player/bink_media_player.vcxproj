@@ -120,10 +120,10 @@
       <Command>echo Platform: $(PlatformShortName)
 
 if "$(PlatformShortName)" == "x86" (
-  copy /B "$(SolutionDir)deps\bink\binkw32.dll" "$(OutputPath)binkw32.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w32.dll" "$(OutputPath)bink2w32.dll"
   copy /B "$(SolutionDir)deps\miles\mss32.dll" "$(OutputPath)mss32.dll"
 ) else (
-  copy /B "$(SolutionDir)deps\bink\binkw64.dll" "$(OutputPath)binkw64.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w64.dll" "$(OutputPath)bink2w64.dll"
   copy /B "$(SolutionDir)deps\miles\mss64.dll" "$(OutputPath)mss64.dll"
 )
 
@@ -159,10 +159,10 @@ copy /B "$(SolutionDir)out\binkmp\$(Platform)\$(Configuration)\binkmp.dll" "$(Ou
       <Command>echo Platform: $(PlatformShortName)
 
 if "$(PlatformShortName)" == "x86" (
-  copy /B "$(SolutionDir)deps\bink\binkw32.dll" "$(OutputPath)binkw32.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w32.dll" "$(OutputPath)bink2w32.dll"
   copy /B "$(SolutionDir)deps\miles\mss32.dll" "$(OutputPath)mss32.dll"
 ) else (
-  copy /B "$(SolutionDir)deps\bink\binkw64.dll" "$(OutputPath)binkw64.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w64.dll" "$(OutputPath)bink2w64.dll"
   copy /B "$(SolutionDir)deps\miles\mss64.dll" "$(OutputPath)mss64.dll"
 )
 
@@ -204,10 +204,10 @@ copy /B "$(SolutionDir)out\binkmp\$(Platform)\$(Configuration)\binkmp.dll" "$(Ou
       <Command>echo Platform: $(PlatformShortName)
 
 if "$(PlatformShortName)" == "x86" (
-  copy /B "$(SolutionDir)deps\bink\binkw32.dll" "$(OutputPath)binkw32.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w32.dll" "$(OutputPath)bink2w32.dll"
   copy /B "$(SolutionDir)deps\miles\mss32.dll" "$(OutputPath)mss32.dll"
 ) else (
-  copy /B "$(SolutionDir)deps\bink\binkw64.dll" "$(OutputPath)binkw64.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w64.dll" "$(OutputPath)bink2w64.dll"
   copy /B "$(SolutionDir)deps\miles\mss64.dll" "$(OutputPath)mss64.dll"
 )
 
@@ -249,10 +249,10 @@ copy /B "$(SolutionDir)out\binkmp\$(Platform)\$(Configuration)\binkmp.dll" "$(Ou
       <Command>echo Platform: $(PlatformShortName)
 
 if "$(PlatformShortName)" == "x86" (
-  copy /B "$(SolutionDir)deps\bink\binkw32.dll" "$(OutputPath)binkw32.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w32.dll" "$(OutputPath)bink2w32.dll"
   copy /B "$(SolutionDir)deps\miles\mss32.dll" "$(OutputPath)mss32.dll"
 ) else (
-  copy /B "$(SolutionDir)deps\bink\binkw64.dll" "$(OutputPath)binkw64.dll"
+  copy /B "$(SolutionDir)deps\bink\bink2w64.dll" "$(OutputPath)bink2w64.dll"
   copy /B "$(SolutionDir)deps\miles\mss64.dll" "$(OutputPath)mss64.dll"
 )
 
@@ -265,10 +265,6 @@ copy /B "$(SolutionDir)out\binkmp\$(Platform)\$(Configuration)\binkmp.dll" "$(Ou
   <ItemGroup>
     <ClCompile Include="bink_media_player_host.cc" />
     <ClCompile Include="main.cc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\deps\bink\binkw32.dll" />
-    <None Include="..\deps\bink\binkw64.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\binkmp\binkmp.vcxproj">

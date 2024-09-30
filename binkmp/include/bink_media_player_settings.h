@@ -22,6 +22,10 @@ enum class BinkSoundOutputSystem {
    * @brief Direct Sound.
    */
   DirectSound,
+  /**
+   * @brief XAudio2.
+   */
+  XAudio2,
 #endif
 #ifndef __APPLE__
   /**
@@ -31,15 +35,19 @@ enum class BinkSoundOutputSystem {
 #endif
 #ifdef __linux__
   /**
-   * @brief SDL_mixer.
+   * @brief OpenAL.
    */
-  SdlMixer,
+  OpenAL,
 #endif
 #ifdef __APPLE__
   /**
    * @brief MacOS Sound Manager.
    */
-  SoundManager
+  SoundManager,
+  /**
+   * @brief MacOS Core Audio.
+   */
+  CoreAudio
 #endif
 };
 
@@ -69,10 +77,11 @@ struct BinkMediaPlayerSettings {
 #if defined(_WIN32)
   /**
    * @brief Either Miles Sound System HDIGDRIVER handle that is returned from
-   * the Miles function (AIL_waveOutOpen), or DirectSound object handle that is
-   * returned from the DirectSound function, CreateDirectSound.
+   * the Miles function (AIL_waveOutOpen); DirectSound object handle that is
+   * returned from the DirectSound function, CreateDirectSound or IXAudio2
+   * handle from XAudio2Create.
    */
-  void* miles_driver_or_direct_sound;
+  void* miles_driver_or_direct_sound_or_xaudio2;
 #elif !defined(__APPLE__)
   /**
    * @brief Miles Sound System HDIGDRIVER handle that is returned from the Miles
