@@ -27,6 +27,7 @@ HBINK RADEXPLINK BinkOpen(const char PTR4*, U32) { return 0; }
 void RADEXPLINK BinkGetFrameBuffersInfo(HBINK, BINKFRAMEBUFFERS*) {}
 void RADEXPLINK BinkRegisterFrameBuffers(HBINK, BINKFRAMEBUFFERS*) {}
 S32 RADEXPLINK BinkDoFrame(HBINK) { return 0; }
+S32 RADEXPLINK BinkDoFramePlane(HBINK, U32) { return 0; }
 void RADEXPLINK BinkNextFrame(HBINK) {}
 S32 RADEXPLINK BinkWait(HBINK) { return 0; }
 void RADEXPLINK BinkClose(HBINK) {}

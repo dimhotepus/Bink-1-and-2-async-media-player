@@ -3,9 +3,9 @@
 
 #define BINKMAJORVERSION 1
 #define BINKMINORVERSION 9
-#define BINKSUBVERSION 3
-#define BINKVERSION "1.9c"
-#define BINKDATE    "2008-01-15"
+#define BINKSUBVERSION 9
+#define BINKVERSION "1.9i"
+#define BINKDATE    "2008-10-31"
 
 #ifndef __RADRES__
 
@@ -90,14 +90,12 @@ typedef struct BINKSND {
   U8 PTR4* sndend;            // end of the sound buffer
   UINTa sndcomp;              // sound compression handle
 
-  U8 PTR4* sndreadpos;        // current read position (needs to be after the pad)
+  U8 PTR4* sndreadpos;        // current read position
 
 #if defined( BINK_SPU_PROCESS )
   struct binksnd_hide  // put variables that we don't want to accidentally
   {                    //   use on the spu into a structure
 #endif
-  U32 padding;
-
   U32 orig_freq;
   U32 freq;
   S32 bits,chans;
@@ -484,6 +482,13 @@ RADEXPFUNC void RADEXPLINK BinkLoadUnloadConverter( U32 surfaces, S32 inout );
 #define BINKGETKEYCLOSEST      2
 #define BINKGETKEYNOTEQUAL   128
 
+#define BINKDOFRAMEY           1
+#define BINKDOFRAMEA           2
+#define BINKDOFRAMECRCB        4
+#define BINKDOFRAMESTART       256
+#define BINKDOFRAMEEND         512
+
+
 //=======================================================================
 
 #ifdef __RADMAC__
@@ -509,6 +514,7 @@ RADEXPFUNC HBINK RADEXPLINK BinkOpen(const char PTR4* name,U32 flags);
 RADEXPFUNC void RADEXPLINK BinkGetFrameBuffersInfo( HBINK bink, BINKFRAMEBUFFERS * fbset );
 RADEXPFUNC void RADEXPLINK BinkRegisterFrameBuffers( HBINK bink, BINKFRAMEBUFFERS * fbset );
 RADEXPFUNC S32  RADEXPLINK BinkDoFrame(HBINK bnk);
+RADEXPFUNC S32  RADEXPLINK BinkDoFramePlane(HBINK bnk,U32 which_planes);
 RADEXPFUNC void RADEXPLINK BinkNextFrame(HBINK bnk);
 RADEXPFUNC S32  RADEXPLINK BinkWait(HBINK bnk);
 RADEXPFUNC void RADEXPLINK BinkClose(HBINK bnk);
@@ -608,6 +614,10 @@ RADEXPFUNC S32 RADEXPLINK BinkControlPlatformFeatures( S32 use, S32 dont_use );
 
   RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenXAudio(UINTa param); // don't call directly
   #define BinkSoundUseXAudio() BinkSetSoundSystem(BinkOpenXAudio,0)
+
+  RADEXPFUNC BINKSNDOPEN RADEXPLINK BinkOpenXAudio2(UINTa param); // don't call directly
+  #define BinkSoundUseXAudio2(IXAudio2_ptr) BinkSetSoundSystem(BinkOpenXAudio2,(UINTa)IXAudio2_ptr)
+
 
 #endif
 

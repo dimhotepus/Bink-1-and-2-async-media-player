@@ -129,6 +129,7 @@
         #define __RADBIGENDIAN__
         #define RADINLINE inline
         #define RADRESTRICT __restrict
+        #define __RADALTIVEC__
       #endif
 
       #ifndef __LP32__
@@ -510,7 +511,7 @@
       #define U32 unsigned int
       #define S32 signed int
       // Pointers are 32 bits.
-      #if (_MSC_VER >= 1300 && _Wp64)
+      #if ( ( defined(_MSC_VER) && (_MSC_VER >= 1300 ) ) && ( defined(_Wp64) && ( _Wp64 ) ) )
         #define INTADDR __w64 long
         #define UINTADDR __w64 unsigned long
 
