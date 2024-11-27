@@ -202,8 +202,8 @@ struct BINK_ATTRIBUTE_NO_VTABLE IBinkMediaPlayer {
    * @param height New height.
    * @return true on success, false on failure.
    */
-  virtual bool SetWindowScale(unsigned width,
-                              unsigned height) const noexcept = 0;
+  virtual bool SetWindowScale(unsigned &width,
+                              unsigned &height) const noexcept = 0;
 };
 
 }  // namespace bink

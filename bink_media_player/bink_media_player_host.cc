@@ -36,12 +36,14 @@ void ClearToBlack(HWND window) noexcept {
 
 /**
  * @brief Gets video offsets for window.
- * @param content Media.
+ * @param media_width Media width.
+ * @param media_height Media height.
  * @param window Window.
  * @return {x, y} offsets for video in |window|.
  */
-std::tuple<unsigned, unsigned> GetMediaOffsetsForWindow(
-    bink::BinkMediaInfo content, HWND window) noexcept {
+std::tuple<unsigned, unsigned> GetMediaOffsetsForWindow(unsigned media_width,
+                                                        unsigned media_height,
+                                                        HWND window) noexcept {
   BINK_DCHECK(!!window);
 
   RECT rc;
@@ -55,8 +57,8 @@ std::tuple<unsigned, unsigned> GetMediaOffsetsForWindow(
     return area > inner ? (area - inner) / 2U : 0U;
   };
 
-  const unsigned x{get_shift(width, content.width)};
-  const unsigned y{get_shift(height, content.height)};
+  const unsigned x{get_shift(width, media_width)};
+  const unsigned y{get_shift(height, media_height)};
 
   return std::tuple{x, y};
 }
@@ -93,7 +95,8 @@ namespace bink {
           .bink_flags = player_settings.bink_flags,
           .buffer_flags = player_settings.buffer_flags,
           .sound_output_system = bink::BinkSoundOutputSystem::Miles,
-          .miles_driver_or_direct_sound_or_xaudio2 = mss_digital_driver->native_handle(),
+          .miles_driver_or_direct_sound_or_xaudio2 =
+              mss_digital_driver->native_handle(),
           .used_cpus_count = player_settings.used_cpus_count});
   if (!bink_create_result.has_value()) [[unlikely]] {
     return NewResult{std::unexpect, bink_create_result.error()};
@@ -175,16 +178,18 @@ BOOL BinkMediaPlayerHost::OnWindowPositionChanging(
 
 void BinkMediaPlayerHost::OnWindowPositionChanged(
     HWND window, const WINDOWPOS *pos) const noexcept {
-  bink::BinkMediaInfo content;
+  BINK_DCHECK(pos->cx >= 0);
+  BINK_DCHECK(pos->cy >= 0);
 
-  [[maybe_unused]] bool is_ok{bink_media_player_->GetMediaInfo(content)};
-  BINK_DCHECK(is_ok);
-
-  const auto [x, y] = GetMediaOffsetsForWindow(content, window);
+  unsigned media_width{static_cast<unsigned>(pos->cx)},
+      media_height{static_cast<unsigned>(pos->cy)};
 
   // Tell the BinkBuffer API to scale when needed.
-  is_ok = bink_media_player_->SetWindowScale(pos->cx, pos->cy);
+  bool is_ok = bink_media_player_->SetWindowScale(media_width, media_height);
   BINK_DCHECK(is_ok);
+
+  const auto [x, y] =
+      GetMediaOffsetsForWindow(media_width, media_height, window);
 
   // Tell the BinkBuffer API when the window moves.
   is_ok = bink_media_player_->SetWindowOffset(x, y);

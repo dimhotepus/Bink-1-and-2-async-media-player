@@ -49,8 +49,10 @@ bool MoveToMainDisplayCenter(_In_ HWND window,
   bool is_ok{!!::GetWindowRect(window, &window_rect)};
   BINK_DCHECK(is_ok);
 
-  const long screen_width{::GetSystemMetrics(SM_CXSCREEN)},
-      screen_height{::GetSystemMetrics(SM_CYSCREEN)};
+  const unsigned dpi{::GetDpiForWindow(window)};
+
+  const long screen_width{::GetSystemMetricsForDpi(SM_CXSCREEN, dpi)},
+      screen_height{::GetSystemMetricsForDpi(SM_CYSCREEN, dpi)};
   const int window_width{std::min(screen_width, bink::GetWidth(window_rect))},
       window_height{std::min(screen_height, bink::GetHeight(window_rect))};
   const int x{(screen_width - window_width) / 2},
